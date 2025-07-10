@@ -10,7 +10,13 @@ Userscript to bulk set Steam nicknames, with an optional prefix.
 1. **Chrome and Opera Only** - Enable Developer Mode in Extension Settings
     - Go to Extension Settings for your browser (Or paste `chrome://extensions/` into URL bar)
     - Enable "Developer Mode" (toggle switch on top right)
-1. Automatically install using the "Install" button at this link: [https://raw.githubusercontent.com/jxtt-dev/bulk_steam_nickname/refs/heads/main/index.user.js](https://raw.githubusercontent.com/jxtt-dev/bulk_steam_nickname/refs/heads/main/index.user.js)
+1. **Chrome and Opera Only** - Allow User Scripts in Tampermonkey Settings
+    - Go to Extension Settings for your browser (Or paste `chrome://extensions/` into URL bar)
+    - Click "Details" under the Tampermonkey extension
+    - Enable the "Allow User Scripts" toggle switch
+    - Restart your Browser
+    - Learn why this step is required here: https://www.tampermonkey.net/faq.php?#Q209
+1. Install the userscript using the "Install" button at this link: https://raw.githubusercontent.com/jxtt-dev/bulk_steam_nickname/refs/heads/main/index.user.js
 
 If automatic install does not work:
 1. Copy source from [here](https://github.com/jxtt-dev/bulk_steam_nickname/blob/main/index.user.js)
