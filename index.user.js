@@ -21,19 +21,22 @@
 
     // SteamID regex
     const STEAM_ID_REGEX = /^\d{17}$/;
-    const REQUEST_DELAY = 1500; // Delay between API requests in ms
+    const REQUEST_DELAY = 500; // Delay between API requests in ms
 
     // UI text constants
     const UI_TEXT = {
         TITLE: 'Bulk Steam Nickname',
         SUBTITLE: 'Nicknames are set even if you aren\'t friends with the user',
-        PREFIX_LABEL: 'Nickname prefix:',
+        PREFIX_LABEL: 'Nickname prefix',
+        FRIEND_REQUEST_LABEL: 'Automatically send or accept Friend Request',
         ADD_ROW: 'Add Row',
         SUBMIT_CSV: 'Submit CSV',
         APPLY: 'Apply',
         EXPORT_CSV: 'Copy as CSV',
         CLOSE: 'Close',
         CSV_PLACEHOLDER: 'Paste CSV data here (steamId,nickname)',
+        GITHUB_NAME: '@jxtt-dev',
+        GITHUB_LINK: 'https://github.com/jxtt-dev/bulk_steam_nickname',
         LOADING: '⌛',
         SUCCESS: '✅',
         ERROR: '❌'
@@ -44,6 +47,7 @@
         DARK_BLUE_BORDER: '#3b4751',
         DARK_HEADER_BG: '#2a475e',
         WHITE_TEXT: '#fff',
+        GRAY_TEXT: '#8F98A0',
         DARK_TABLE_BG: '#1b2838',
         LIGHT_GRAYISH_BLUE_TEXT: '#c6d4df',
         VERY_DARK_BLUE_POPUP_BG: '#171a21',
@@ -95,20 +99,20 @@
             max-width: 600px;
         }
         #bsn_titleText {
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             color: ${COLORS.WHITE_TEXT};
-            font-size: 16px;
+            font-size: 20px;
         }
         #bsn_subtitleText {
-            margin: 0 0 5px 0;
+            margin: 0 0 10px 0;
             color: ${COLORS.WHITE_TEXT};
             width: 375px;
-            font-size: 12px;
+            font-size: 11px;
         }
         #bsn_prefixContainer {
             display: flex;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 5px;
             justify-content: space-between;
             width: 100%;
         }
@@ -125,11 +129,58 @@
             padding: 5px;
             border-radius: 3px;
         }
+        #bsn_friendRequestContainer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        #bsn_friendRequestCheckbox {
+            display: none;
+        }
+        #bsn_friendRequestLabel {
+            color: ${COLORS.WHITE_TEXT};
+            cursor: pointer;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            justify-content: space-between;
+        }
+        .bsn_toggleSwitch {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            background-color: ${COLORS.DARK_BLUE_BORDER};
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            flex-shrink: 0;
+        }
+        .bsn_toggleSwitch::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background-color: ${COLORS.WHITE_TEXT};
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+        #bsn_friendRequestCheckbox:checked + #bsn_friendRequestLabel .bsn_toggleSwitch {
+            background-color: ${COLORS.DARK_GREEN};
+        }
+        #bsn_friendRequestCheckbox:checked + #bsn_friendRequestLabel .bsn_toggleSwitch::after {
+            transform: translateX(20px);
+        }
         #bsn_table {
             border-collapse: collapse;
             width: 100%;
             max-width: 600px;
             max-height: 300px;
+            min-width: 450px;
             overflow-y: auto;
             display: block;
             background-color: ${COLORS.DARK_TABLE_BG};
@@ -150,7 +201,7 @@
             border-bottom: 1px solid ${COLORS.DARK_BLUE_BORDER};
             padding: 8px;
         }
-        #bsn_rowNumCell {
+        .bsn_rowNumCell {
             padding: 8px;
             border-bottom: 1px solid ${COLORS.DARK_BLUE_BORDER};
         }
@@ -168,7 +219,15 @@
         }
         .bsn_rowInput.invalid {
             outline: none;
-            border: 2px solid ${COLORS.ERROR_RED};
+            border: 1px solid ${COLORS.ERROR_RED};
+        }
+        .bsn_rowInput::-webkit-outer-spin-button,
+        .bsn_rowInput::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        .bsn_rowInput {
+            -moz-appearance: textfield;
         }
         .bsn_button {
             padding: 5px 10px;
@@ -190,7 +249,7 @@
         .bsn_blue_button:hover {
             background-color: #3a5f7d;
         }
-        #bsn_removeUserButton {
+        .bsn_removeUserButton {
             background-color: ${COLORS.DARK_HEADER_BG};
             color: ${COLORS.WHITE_TEXT};
             border: none;
@@ -199,7 +258,7 @@
             display: block;
             transition: background-color 0.2s;
         }
-        #bsn_removeUserButton:hover {
+        .bsn_removeUserButton:hover {
             background-color: #c0392b;
         }
         #bsn_addRowButton {
@@ -212,7 +271,7 @@
             margin: 10px 0;
             width: 100%;
             max-width: 375px;
-            min-height: 20px;
+            align-self: center;
         }
         #bsn_csvInputContainer {
             display: flex;
@@ -235,6 +294,21 @@
             justify-content: space-between;
             width: 100%;
             margin-top: 10px;
+        }
+        #bsn_githubLinkContainer {
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 10px;
+            color: ${COLORS.GRAY_TEXT};
+            font-size: 12px;
+            align-self: center;
+        }
+        #bsn_githubLinkContainer svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+            fill: ${COLORS.GRAY_TEXT};
         }
         #bsn_statusContainer {
             font-size: 14px;
@@ -270,14 +344,33 @@
     }
 
     /**
-     * Show an error message in the container
-     * @param {string} message - Error message to display
+     * Show an array of errors
+     * If the array is empty, the container is cleared
+     * @param {string[]} errors - Array of error messages to display
      */
-    function showError(message) {
+    function showError(errors) {
         const errorContainer = document.getElementById('bsn_errorMessageContainer');
-        if (errorContainer) {
-            errorContainer.textContent = message;
+
+        if (!errorContainer) {
+            console.error('Error container not found.');
+            return;
         }
+
+        errorContainer.textContent = '';
+        if (!errors || errors.length === 0) {
+            return;
+        }
+
+        // Create list of errors
+        const ul = document.createElement('ul');
+        ul.style = 'list-style-type: none; margin: 0; padding: 0;';
+        errors.forEach(error => {
+            const li = document.createElement('li');
+            li.textContent = error;
+            ul.appendChild(li);
+        });
+
+        errorContainer.appendChild(ul);
     }
 
     /**
@@ -304,6 +397,47 @@
     }
 
     /**
+     * Send friend request to a Steam user
+     * @param {string} sessionid - Steam session ID
+     * @param {string} steamId - Steam ID to send friend request to
+     * @returns {Promise<string>} Promise resolving to response text
+     */
+    function sendFriendRequest(sessionid, steamId) {
+        return new Promise((resolve, reject) => {
+            const ajaxAddFriendURL = 'https://steamcommunity.com/actions/AddFriendAjax';
+
+            // ID in sessionID is capitalized
+            const requestData = {
+                'steamid': steamId,
+                'sessionID': sessionid,
+            };
+
+            // URL-encode
+            const requestBody = new URLSearchParams(requestData).toString();
+
+            GM_xmlhttpRequest({
+                method: 'POST',
+                url: ajaxAddFriendURL,
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                data: requestBody,
+                onload: function (response) {
+                    if (response.status >= 200 && response.status < 300) {
+                        resolve(response.responseText);
+                    } else {
+                        reject(new Error(`Request failed: Status ${response.status}, Response: ${response.responseText}`));
+                    }
+                },
+                onerror: function (error) {
+                    reject(new Error(`Network error: ${JSON.stringify(error)}`));
+                }
+            });
+        });
+    }
+
+    /**
      * Send request to set a Steam nickname
      * @param {string} sessionid - Steam session ID
      * @param {string} steamId - Steam ID to set nickname for
@@ -314,6 +448,15 @@
         return new Promise((resolve, reject) => {
             const ajaxSetNicknameURL = `https://steamcommunity.com/profiles/${steamId}/ajaxsetnickname/`;
 
+            // ID in sessionid is lowercase
+            const requestData = {
+                'nickname': nickname,
+                'sessionid': sessionid,
+            };
+
+            // URL-encode
+            const requestBody = new URLSearchParams(requestData).toString();
+
             GM_xmlhttpRequest({
                 method: 'POST',
                 url: ajaxSetNicknameURL,
@@ -321,7 +464,7 @@
                     'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
                     'X-Requested-With': 'XMLHttpRequest'
                 },
-                data: `nickname=${encodeURIComponent(nickname)}&sessionid=${encodeURIComponent(sessionid)}`,
+                data: requestBody,
                 onload: function (response) {
                     if (response.status >= 200 && response.status < 300) {
                         resolve(response.responseText);
@@ -405,14 +548,14 @@
 
         // Row number column
         const rowNumCell = document.createElement('td');
-        rowNumCell.id = 'bsn_rowNumCell';
+        rowNumCell.className = 'bsn_rowNumCell';
         rowNumCell.textContent = rowNum;
 
         // Steam ID column
         const steamIdCell = document.createElement('td');
         const steamIdInput = document.createElement('input');
         steamIdInput.className = 'bsn_rowInput';
-        steamIdInput.type = 'text';
+        steamIdInput.type = 'number';
         steamIdInput.value = steamId;
         steamIdCell.appendChild(steamIdInput);
 
@@ -430,13 +573,14 @@
         const nicknameInput = document.createElement('input');
         nicknameInput.className = 'bsn_rowInput';
         nicknameInput.type = 'text';
+        nicknameInput.maxLength = 32;
         nicknameInput.value = nickname;
         nicknameCell.appendChild(nicknameInput);
 
         // Remove button column
         const removeUserCell = document.createElement('td');
         const removeUserButton = document.createElement('button');
-        removeUserButton.id = 'bsn_removeUserButton';
+        removeUserButton.className = 'bsn_removeUserButton';
         removeUserButton.textContent = 'X';
 
         removeUserButton.addEventListener('click', () => {
@@ -529,6 +673,35 @@
         prefixContainer.append(prefixLabel, prefixInput);
         popupContainer.appendChild(prefixContainer);
 
+        // Create friend request checkbox
+        const friendRequestContainer = document.createElement('div');
+        friendRequestContainer.id = 'bsn_friendRequestContainer';
+
+        const friendRequestCheckbox = document.createElement('input');
+        friendRequestCheckbox.id = 'bsn_friendRequestCheckbox';
+        friendRequestCheckbox.type = 'checkbox';
+        friendRequestCheckbox.checked = GM_getValue('sendFriendRequest', false);
+
+        // Save checkbox state when it changes
+        friendRequestCheckbox.addEventListener('change', () => {
+            GM_setValue('sendFriendRequest', friendRequestCheckbox.checked);
+        });
+
+        const friendRequestLabel = document.createElement('label');
+        friendRequestLabel.id = 'bsn_friendRequestLabel';
+        friendRequestLabel.htmlFor = 'bsn_friendRequestCheckbox';
+
+        // Create label text
+        const labelText = document.createTextNode(UI_TEXT.FRIEND_REQUEST_LABEL);
+
+        // Create toggle switch element
+        const toggleSwitch = document.createElement('span');
+        toggleSwitch.className = 'bsn_toggleSwitch';
+
+        friendRequestLabel.append(labelText, toggleSwitch);
+        friendRequestContainer.append(friendRequestCheckbox, friendRequestLabel);
+        popupContainer.appendChild(friendRequestContainer);
+
         // Create table for nicknames
         const table = document.createElement('table');
         table.id = 'bsn_table';
@@ -605,12 +778,35 @@
         bottomButtonContainer.append(applyButton, csvExportButton, closeButton);
         popupContainer.appendChild(bottomButtonContainer);
 
+        // Create bottom text container
+        const githubLinkContainer = document.createElement('a');
+        githubLinkContainer.id = 'bsn_githubLinkContainer';
+        githubLinkContainer.href = UI_TEXT.GITHUB_LINK;
+        githubLinkContainer.textContent = UI_TEXT.GITHUB_NAME;
+
+        // GitHub logo SVG
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+        const githubLogo = document.createElementNS(SVG_NS, 'svg');
+        githubLogo.setAttribute('viewBox', '0 0 16 16');
+        githubLogo.setAttribute('xmlns', SVG_NS);
+
+        const path = document.createElementNS(SVG_NS, 'path');
+        const pathData = 'M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8';
+        path.setAttribute('d', pathData);
+        githubLogo.appendChild(path);
+
+        githubLinkContainer.prepend(githubLogo);
+        popupContainer.appendChild(githubLinkContainer);
+
         // ====== Event Listeners ======
 
         // Apply button event listener
         applyButton.addEventListener('click', async () => {
+            // Reset error message
+            showError([]);
+
             if (tbody.rows.length < 1) {
-                showError('No data to apply');
+                showError(['No data to apply']);
                 return;
             }
 
@@ -629,7 +825,7 @@
             });
 
             if (invalidRows.length > 0) {
-                showError(`Invalid SteamIDs in row(s): ${invalidRows.join(', ')}`);
+                showError([`Invalid SteamIDs in row(s): ${invalidRows.join(', ')}`]);
                 return;
             }
 
@@ -645,16 +841,22 @@
                     }
                 });
 
-                showError(`Duplicate SteamIDs in row(s): ${duplicateRows.join(', ')}`);
+                showError([`Duplicate SteamIDs in row(s): ${duplicateRows.join(', ')}`]);
                 return;
             }
 
             // Get session ID
             const sessionID = getSessionID();
             if (!sessionID) {
-                showError('Session ID not found. Please reload the page.');
+                showError(['Session ID not found. Please reload the page.']);
                 return;
             }
+
+            // Check if friend request should be sent
+            const shouldSendFriendRequest = friendRequestCheckbox.checked;
+
+            // Store error messages
+            let errorMessages = [];
 
             // Process each row
             for (let i = 0; i < tbody.rows.length; i++) {
@@ -662,6 +864,7 @@
                 const statusCell = row.cells[3];
                 const steamId = nicknameData[i].steamId;
                 const nickname = nicknameData[i].nickname;
+                let prevError = false;
 
                 // Skip empty Steam IDs
                 if (!steamId) continue;
@@ -676,23 +879,44 @@
                 statusContainer.appendChild(spinner);
                 statusCell.appendChild(statusContainer);
 
+                // Send friend request if checkbox is checked
+                if (shouldSendFriendRequest) {
+                    try {
+                        await sendFriendRequest(sessionID, steamId);
+                    } catch (error) {
+                        console.error('Error sending friend request:', error);
+                        statusContainer.textContent = UI_TEXT.ERROR;
+                        prevError = true;
+                        statusContainer.title = 'Error sending friend request. See console for more details.';
+                        errorMessages.push(`Failed to send friend request for row ${i + 1} (SteamID: ${steamId})`);
+                    }
+                }
+
                 // Set Steam Nickname using AJAX request
                 try {
                     const nicknamePrefix = prefixInput.value;
                     const fullNickname = `${nicknamePrefix}${nickname}`;
 
                     await setSteamNickname(sessionID, steamId, fullNickname);
-                    statusContainer.textContent = UI_TEXT.SUCCESS;
+                    if (!prevError) {
+                        statusContainer.textContent = UI_TEXT.SUCCESS;
+                    }
                 } catch (error) {
-                    console.error('Nickname set error:', error);
+                    console.error('Error setting nickname:', error);
                     statusContainer.textContent = UI_TEXT.ERROR;
-                    statusContainer.title = error.message;
+                    statusContainer.title = 'Error setting nickname. See console for more details.';
+                    errorMessages.push(`Failed to set nickname for row ${i + 1} (SteamID: ${steamId})`);
                 }
 
                 // Add delay between requests to avoid rate limiting
                 if (i < tbody.rows.length - 1) {
                     await new Promise(resolve => setTimeout(resolve, REQUEST_DELAY));
                 }
+            }
+
+            // Display errors, if any
+            if (errorMessages.length > 0) {
+                showError(errorMessages);
             }
         });
 
@@ -710,7 +934,7 @@
                     }, 2000);
                 })
                 .catch(err => {
-                    showError('Failed to copy: ' + err.message);
+                    showError(['Failed to copy: ' + err.message]);
                 });
         });
 
@@ -722,7 +946,7 @@
             const result = parseCsv(csvText);
 
             if (result.errors.length > 0) {
-                showError(`Some lines were invalid and skipped: ${result.errors.length} error(s)`);
+                showError([`Some lines were invalid and skipped: ${result.errors.length} error(s)`]);
                 console.error('CSV parse errors:', result.errors);
             }
 
@@ -741,7 +965,7 @@
                 csvInputArea.value = '';
                 csvInputArea.style.height = 'auto';
             } else if (result.errors.length === 0) {
-                showError('No valid data found in CSV input');
+                showError(['No valid data found in CSV input']);
             }
         });
 
