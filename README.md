@@ -32,6 +32,11 @@ Use Chrome for best results
     - To clear a users nickname, leave the Nickname field blank
 1. Use the "Add Row" button to add more users to the list
 1. Optionally enter a prefix for all nicknames
+1. Toggle "Automatically send or accept Friend Request" to automatically send or accept friend requests
+    - **⚠️Steam has a limit on how many friend requests you can send at the same time. If you need to send many requests at once, this option might not work for all of them**
+    - If you are already friends with the user, nothing will happen
+    - If you do not have a friend request with the user, one will be sent
+    - If the user has sent you a friend request, it will be accepted
 1. Use the "Apply" button to apply Nicknames (and prefixes) to all users in the table
 
 <img src="https://github.com/jxtt-dev/bulk_steam_nickname/blob/main/images/example.jpg" width="300">
