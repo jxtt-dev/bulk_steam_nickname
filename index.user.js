@@ -14,7 +14,7 @@
 // @grant        GM_getValue
 // ==/UserScript==
 
-(function () {
+(function() {
     'use strict';
 
     // ====== Constants & Config ======
@@ -59,7 +59,10 @@
     // ====== State Management ======
 
     // Nickname data with default empty item
-    let nicknameData = GM_getValue('nicknameData', [{ steamId: '', nickname: '' }]);
+    let nicknameData = GM_getValue('nicknameData', [{
+        steamId: '',
+        nickname: ''
+    }]);
     let popupElement = null;
 
     // ====== Styles ======
@@ -423,14 +426,14 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 data: requestBody,
-                onload: function (response) {
+                onload: function(response) {
                     if (response.status >= 200 && response.status < 300) {
                         resolve(response.responseText);
                     } else {
                         reject(new Error(`Request failed: Status ${response.status}, Response: ${response.responseText}`));
                     }
                 },
-                onerror: function (error) {
+                onerror: function(error) {
                     reject(new Error(`Network error: ${JSON.stringify(error)}`));
                 }
             });
@@ -465,14 +468,14 @@
                     'X-Requested-With': 'XMLHttpRequest'
                 },
                 data: requestBody,
-                onload: function (response) {
+                onload: function(response) {
                     if (response.status >= 200 && response.status < 300) {
                         resolve(response.responseText);
                     } else {
                         reject(new Error(`Request failed: Status ${response.status}, Response: ${response.responseText}`));
                     }
                 },
-                onerror: function (error) {
+                onerror: function(error) {
                     reject(new Error(`Network error: ${JSON.stringify(error)}`));
                 }
             });
@@ -507,7 +510,10 @@
                 const steamId = parts[0].trim();
                 // Join remaining parts for nickname in case nickname contains commas
                 const nickname = parts.slice(1).join(',').trim();
-                parsedData.push({ steamId, nickname });
+                parsedData.push({
+                    steamId,
+                    nickname
+                });
             } else {
                 parseErrors.push(`Line ${index + 1}: ${line}`);
             }
@@ -756,7 +762,7 @@
         csvInputArea.placeholder = UI_TEXT.CSV_PLACEHOLDER;
 
         // Auto-resize textarea
-        csvInputArea.addEventListener('input', function () {
+        csvInputArea.addEventListener('input', function() {
             const maxHeight = 100;
             this.style.height = 'auto';
             this.style.height = Math.min(this.scrollHeight, maxHeight) + 'px';
